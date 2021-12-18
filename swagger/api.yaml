@@ -1,0 +1,282 @@
+openapi: 3.0.1
+info:
+  title: WEB CHATS API
+  description: This is a WEB CHATS API
+  contact:
+    email: deltabd33@gmail.com
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  version: 1.0.0
+servers:
+- url: http://127.0.0.1:5000/
+paths:
+  
+  /register:
+    post:
+      summary: register a new user
+      description: Register and add to system new user
+      operationId: registerUser
+      requestBody:
+        description: User info that needs to register
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        200:
+          description: User registered correctly
+          content: {}
+        400:
+          description: User with this login already exists or other error
+      x-codegen-request-body-name: body
+  
+  /login:
+    post:
+      summary: login user
+      description: login user in webchat
+      operationId: loginUser
+      requestBody:
+        description: User info that needs to login
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+        required: true
+      responses:
+        200:
+          description: User was correctly login
+          headers:
+            x-auth-key:
+              description: Auth key of current user session
+              schema:
+                $ref: '#/components/securitySchemes/SessionKey'
+          content: {}
+        400:
+          description: User with this login is not exist
+        401:
+          description: Incorrect password
+  
+  /chats:
+    get:
+      summary: get all chats
+      description: get all created chats
+      operationId: getChats
+      responses:
+        200:
+          description: Chats are taken correctly
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatArray'
+        400:
+          description: Incorrect API_KEY or other errors
+          content: {}
+      security:
+      - SessionKey: []
+    post:
+      summary: create new chat
+      description: create new chat with chatName
+      operationId: createNewChat
+      requestBody:
+        description: Data that needs to create new chat
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatPOST'
+        required: true
+      responses:
+        200:
+          description: Chats are created correctly
+        400:
+          description: Incorrect API_KEY or other errors
+      security:
+      - SessionKey: [] 
+  
+  /chats/{chatId}:
+    get:
+      summary: get all messages in chat with entered id
+      description: get messages in concrete chat 
+      operationId: getMessagesInChat
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        200:
+          description: Chats are taken correctly
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageArray'
+        400:
+          description: Incorrect API_KEY or incorrect chat ID or other errors
+      security:
+      - SessionKey: [] 
+    post:
+      summary: send message in chat with entered id
+      description: send message in concrete chat
+      operationId: sendMessageInChat
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      requestBody:
+        description: Message that user send to chat with id chatId
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessagePOST'
+        required: true
+      responses:
+        200:
+          description: Message was sent correctly
+        400:
+          description: Incorrect API_KEY or incorrect chat ID or other errors
+      security:
+      - SessionKey: []
+      
+      
+  /chats/{chatId}/{lastMessageId}:
+    get:
+      summary: get all messages after last message in chat with entered id
+      description: get messages after last message in concrete chat 
+      operationId: getMessagesInChatAfterLastMessage
+      parameters:
+        - in: path
+          name: chatId
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+        - in: path
+          name: lastMessageId
+          required: true
+          schema:
+            type: integer
+            minimum: 1
+      responses:
+        200:
+          description: Messages are taken correctly
+          content: 
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageArray2'
+        400:
+          description: Incorrect API_KEY or incorrect chat ID or other errors
+      security:
+      - SessionKey: [] 
+    
+components:
+  schemas:
+  
+    User:
+      type: object
+      properties:
+        login:
+          type: string
+          example: SomeUser123
+        password:
+          type: string
+          example: MyAweSomePassWd213
+          
+    ChatArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/Chat'
+      example:
+      - chatID: 1
+        chatName: SomeChatName1
+      - chatID: 2
+        chatName: SomeChatName2
+      - chatID: 3
+        chatName: SomeChatName3
+    
+    MessageArray:
+      type: array
+      items:
+        $ref: '#/components/schemas/MessageModel'
+      example:
+      - messageID: 1
+        userLogin: SomeUserLogin1
+        timeStamp: 30.01.21 17:21
+        messageBody: Hello! How are you?)
+      - messageID: 2
+        userLogin: SomeUserLogin2
+        timeStamp: 30.01.21 17:30
+        messageBody: Hi! Im not fine))) And u?)
+      - messageID: 3
+        userLogin: SomeUserLogin1
+        timeStamp: 30.01.21 17:35
+        messageBody: Im fine. Why are u so sad?)
+      - messageID: 4
+        userLogin: SomeUserLogin2
+        timeStamp: 30.01.21 17:36
+        messageBody: Because I've been doing this lab all day. 
+        
+    MessageArray2:
+      type: array
+      items:
+        $ref: '#/components/schemas/MessageModel'
+      example:
+      - messageID: 3
+        userLogin: SomeUserLogin1
+        timeStamp: 30.01.21 17:35
+        messageBody: Im fine. Why are u so sad?)
+      - messageID: 4
+        userLogin: SomeUserLogin2
+        timeStamp: 30.01.21 17:36
+        messageBody: Because I've been doing this lab all day.   
+        
+    Chat:
+      type: object
+      properties:
+        chatID:
+          type: integer
+          example: 1
+        chatName:
+          type: string
+          example: SomeChatName
+          
+    ChatPOST:
+      type: object
+      properties:
+        chatName:
+          type: string
+          example: SomeChatName
+          
+    MessageModel:
+      type: object
+      properties:
+        messageID:
+          type: integer
+          example: 25
+        userLogin:
+          type: string
+          example: SomeUserLogin
+        timeStamp:
+          type: string
+          example: 30.01.21 17:21
+        messageBody:
+          type: string
+          example: Hello! How are you?)
+    
+    MessagePOST:
+      type: object
+      properties:
+        messageBody:
+          type: string
+          example: Hello! How are you?)
+          
+  securitySchemes:
+    SessionKey:
+      type: apiKey
+      name: SessionKey
+      in: header
