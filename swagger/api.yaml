@@ -137,7 +137,7 @@ paths:
         required: true
       responses:
         200:
-          description: Message was sent correctly
+          description: Message was send correctly
         400:
           description: Incorrect API_KEY or incorrect chat ID or other errors
       security:
@@ -192,12 +192,15 @@ components:
       items:
         $ref: '#/components/schemas/Chat'
       example:
-      - chatID: 1
+      - chatId: 1
         chatName: SomeChatName1
-      - chatID: 2
+        creatorName: someUser1
+      - chatId: 2
         chatName: SomeChatName2
-      - chatID: 3
-        chatName: SomeChatName3
+        creatorName: someUser2
+      - chatId: 3
+        chatName: SomeChatName13
+        creatorName: someUser133
     
     MessageArray:
       type: array
@@ -205,19 +208,19 @@ components:
         $ref: '#/components/schemas/MessageModel'
       example:
       - messageID: 1
-        userLogin: SomeUserLogin1
+        creatorName: SomeUserLogin1
         timeStamp: 30.01.21 17:21
         messageBody: Hello! How are you?)
       - messageID: 2
-        userLogin: SomeUserLogin2
+        creatorName: SomeUserLogin2
         timeStamp: 30.01.21 17:30
         messageBody: Hi! Im not fine))) And u?)
       - messageID: 3
-        userLogin: SomeUserLogin1
+        creatorName: SomeUserLogin1
         timeStamp: 30.01.21 17:35
         messageBody: Im fine. Why are u so sad?)
       - messageID: 4
-        userLogin: SomeUserLogin2
+        creatorName: SomeUserLogin2
         timeStamp: 30.01.21 17:36
         messageBody: Because I've been doing this lab all day. 
         
@@ -227,23 +230,26 @@ components:
         $ref: '#/components/schemas/MessageModel'
       example:
       - messageID: 3
-        userLogin: SomeUserLogin1
+        creatorName: SomeUserLogin1
         timeStamp: 30.01.21 17:35
         messageBody: Im fine. Why are u so sad?)
       - messageID: 4
-        userLogin: SomeUserLogin2
+        creatorName: SomeUserLogin2
         timeStamp: 30.01.21 17:36
         messageBody: Because I've been doing this lab all day.   
         
     Chat:
       type: object
       properties:
-        chatID:
+        chatId:
           type: integer
           example: 1
         chatName:
           type: string
           example: SomeChatName
+        creatorName:
+          type: string
+          example: someUser
           
     ChatPOST:
       type: object
@@ -278,5 +284,5 @@ components:
   securitySchemes:
     SessionKey:
       type: apiKey
-      name: SessionKey
+      name: x-auth-key
       in: header
