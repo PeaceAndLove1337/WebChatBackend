@@ -1,0 +1,170 @@
+import datetime
+
+import flask
+from flask import Blueprint, request, jsonify
+from werkzeug.security import check_password_hash
+
+from allfunc import take_user_by_login, take_last_user_session_by_user, \
+    add_new_session_in_db, add_new_user_in_db, is_api_key_working, take_all_chats, take_user_name_by_user_id, \
+    add_new_chat_in_db, take_chat_by_id, take_all_messages_by_chat_id, add_new_message_in_chat_in_db, \
+    take_message_by_message_id, take_all_messages_in_chat_after_message_id
+
+main_blueprint = Blueprint("main_routes", __name__)
+
+
+@main_blueprint.route('/register', methods=['POST'])
+def register():
+    if request.method == "POST":
+
+        json = request.get_json()
+        curr_login = json["login"]
+        curr_password = json["password"]
+        if add_new_user_in_db(curr_login, curr_password):
+            return "User registered correctly"
+        else:
+            return "User with this login already exists or other error", 400
+
+
+@main_blueprint.route('/login', methods=['POST'])
+def login():
+    if request.method == "POST":
+
+        json = request.get_json()
+        curr_login = json["login"]
+        curr_password = json["password"]
+
+        curr_user_data = take_user_by_login(curr_login)
+
+        if curr_user_data is None:
+            return "User with this login is not exist", 400
+
+        elif not check_password_hash(curr_user_data.password, curr_password):
+            return "Incorrect password", 401
+
+        else:
+            curr_time = datetime.datetime.now()
+
+            curr_user_valid_session = take_last_user_session_by_user(curr_user_data)
+
+            response = flask.Response()
+            # Если у пользователя были сессии за последние сутки, то возвращаем токен данной сессии. В противном
+            # случае создаем новый токен, новую сессию, заносим ее в бд.
+            response.headers["Access-Control-Expose-Headers"] = "x-auth-key"
+
+            if (curr_user_valid_session is not None) and (curr_user_valid_session.expired > curr_time):
+
+                response.headers["x-auth-key"] = curr_user_valid_session.api_key
+
+            else:
+                api_key = add_new_session_in_db(curr_user_data)
+
+                if api_key is not None:
+                    response.headers["x-auth-key"] = api_key
+                    response.data = "User was correctly login"
+                else:
+                    response.data = "Internal server error", 400
+
+            return response
+
+
+@main_blueprint.route('/chats', methods=['GET', 'POST'])
+def chats():
+    curr_api_key = request.headers.get("x-auth-key")
+
+    if is_api_key_working(curr_api_key):
+
+        if request.method == "GET":
+
+            all_chats = take_all_chats()
+            json_objects_list = []
+
+            for curr_chat in all_chats:
+                json_objects_list.append(
+                    {
+                        'chatId': curr_chat.chat_id,
+                        'chatName': curr_chat.chat_name,
+                        'creatorName': take_user_name_by_user_id(curr_chat.user_id)
+                    })
+            return jsonify(json_objects_list)
+
+        elif request.method == "POST":
+
+            json = request.get_json()
+            curr_chat_name = json["chatName"]
+            if add_new_chat_in_db(curr_api_key, curr_chat_name):
+                return "Chat was created correctly"
+            else:
+                return "Internal server error"
+
+    else:
+        return "Invalid api key", 400
+
+
+@main_blueprint.route('/chats/<int:chatID>', methods=['GET', 'POST'])
+def messages_in_concrete_chat(chatID: int):
+    curr_api_key = request.headers.get("x-auth-key")
+
+    if take_chat_by_id(chatID) is None:
+        return "Chat with this chatID is not exist", 400
+
+    if is_api_key_working(curr_api_key):
+
+        if request.method == "GET":
+
+            all_messages_in_current_chat = take_all_messages_by_chat_id(chatID)
+            json_objects_list = []
+            for curr_message in all_messages_in_current_chat:
+                json_objects_list.append(
+                    {'messageID': curr_message.message_id,
+                     'creatorName': take_user_name_by_user_id(curr_message.user_id),
+                     'timeStamp': curr_message.time_data,
+                     "messageBody": curr_message.message_body
+                     })
+
+            return jsonify(json_objects_list)
+
+        elif request.method == "POST":
+
+            json = request.get_json()
+            curr_message_body = json["messageBody"]
+            if add_new_message_in_chat_in_db(curr_api_key, chatID, curr_message_body):
+                return "Message was send correctly"
+            else:
+                return "Server internal error", 500  # exception mock
+
+    else:
+        return "Invalid api key", 400
+
+
+@main_blueprint.route('/chats/<int:chatID>/<int:lastMessageId>', methods=['GET'])
+def all_messages_in_chat_after_message(chatID: int, lastMessageId: int):
+    curr_api_key = request.headers.get("x-auth-key")
+
+    if (take_chat_by_id(chatID) is None) \
+            or (take_message_by_message_id(lastMessageId) is None):
+        return "Chat with this chatID or message with lastMessageId is not exist", 400
+
+    if is_api_key_working(curr_api_key):
+
+        if request.method == "GET":
+
+            all_messages_after_id = take_all_messages_in_chat_after_message_id(chatID, lastMessageId)
+
+            json_objects_list = []
+            for curr_message in all_messages_after_id:
+                json_objects_list.append(
+                    {'messageID': curr_message.message_id,
+                     'creatorName': take_user_name_by_user_id(curr_message.user_id),
+                     'timeStamp': curr_message.time_data,
+                     "messageBody": curr_message.message_body
+                     })
+
+            return jsonify(json_objects_list)
+
+    else:
+        return "Invalid api key", 400
+
+
+@main_blueprint.route('/test', methods=['GET'])
+def test():
+    return "Backend works correctly"
