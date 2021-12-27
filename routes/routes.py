@@ -85,7 +85,7 @@ def chats():
                         'chatName': curr_chat.chat_name,
                         'creatorName': take_user_name_by_user_id(curr_chat.user_id)
                     })
-            return jsonify(json_objects_list)
+            return jsonify(json_objects_list), 200
 
         elif request.method == "POST":
 
@@ -133,7 +133,7 @@ def messages_in_concrete_chat(chat_id: int):
                          "messageBody": curr_message.message_body
                          })
 
-                return jsonify(json_objects_list)
+                return jsonify(json_objects_list), 200
 
             else:
                 if count > 0:
@@ -147,7 +147,7 @@ def messages_in_concrete_chat(chat_id: int):
                              "messageBody": curr_message.message_body
                              })
 
-                    return jsonify(json_objects_list)
+                    return jsonify(json_objects_list), 200
 
                 else:
                     messages_before = take_messages_in_chat_before_message_id(chat_id, message_id, -count)
@@ -160,7 +160,7 @@ def messages_in_concrete_chat(chat_id: int):
                              "messageBody": curr_message.message_body
                              })
 
-                    return jsonify(json_objects_list)
+                    return jsonify(json_objects_list), 200
 
         elif request.method == "POST":
 

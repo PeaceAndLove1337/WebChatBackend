@@ -6,7 +6,7 @@ info:
     email: deltabd33@gmail.com
   license:
     name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
   version: 1.0.0
 servers:
 - url: http://127.0.0.1:5000/
@@ -26,10 +26,9 @@ paths:
         required: true
       responses:
         200:
-          description: User registered correctly
-          content: {}
+          description: "User registered correctly"
         400:
-          description: User with this login already exists or other error
+          description: "Bad request: User with this login already exists or other error"
       x-codegen-request-body-name: body
   
   /login:
@@ -54,30 +53,31 @@ paths:
                 $ref: '#/components/securitySchemes/SessionKey'
           content: {}
         400:
-          description: User with this login is not exist
+          description: "Bad request: User with this login is not exist"
         401:
-          description: Incorrect password
+          description: "Unauthorized: Incorrect password"
+        500:
+          description: "Internal Server Error"
   
   /chats:
     get:
       summary: get all chats
-      description: get all created chats
+      description: get all created chats in system
       operationId: getChats
       responses:
         200:
-          description: Chats are taken correctly
+          description: Chats that user takes from appliation
           content: 
             application/json:
               schema:
                 $ref: '#/components/schemas/ChatArray'
-        400:
-          description: Incorrect API_KEY or other errors
-          content: {}
+        401:
+          description: "Unauthorized: Invalid api key"
       security:
       - SessionKey: []
     post:
       summary: create new chat
-      description: create new chat with chatName
+      description: create a new chat with chatName
       operationId: createNewChat
       requestBody:
         description: Data that needs to create new chat
@@ -88,42 +88,58 @@ paths:
         required: true
       responses:
         200:
-          description: Chats are created correctly
-        400:
-          description: Incorrect API_KEY or other errors
+          description: "Chat was created correctly"
+        401:
+          description: "Unauthorized: Invalid api key"
+        500:
+          description: "Internal Server Error"
       security:
       - SessionKey: [] 
   
-  /chats/{chatId}:
+  /chats/{chat_id}:
     get:
-      summary: get all messages in chat with entered id
-      description: get messages in concrete chat 
+      summary: get messages in chat with chat_id
+      description: get a count of messages in chat with chat_id before or after a message_id If count>0 takes messages after messages with message_id. Else takes messages before messages with message_id. If query parameters are empty then takes last 100 messages in chat.
       operationId: getMessagesInChat
       parameters:
         - in: path
-          name: chatId
+          name: chat_id
           required: true
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: count
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+        - in: query
+          name: message_id
+          required: false
           schema:
             type: integer
             minimum: 1
       responses:
         200:
-          description: Chats are taken correctly
-          content: 
+          content:
+            description: Messages that user takes from chat_id
             application/json:
               schema:
                 $ref: '#/components/schemas/MessageArray'
         400:
-          description: Incorrect API_KEY or incorrect chat ID or other errors
+          description: "Bad Request: Message with this message_id is not exist"
+        401:
+          description: "Unauthorized: Invalid api key"
       security:
       - SessionKey: [] 
     post:
-      summary: send message in chat with entered id
+      summary: send message in chat with chat_id
       description: send message in concrete chat
       operationId: sendMessageInChat
       parameters:
         - in: path
-          name: chatId
+          name: chat_id
           required: true
           schema:
             type: integer
@@ -137,42 +153,14 @@ paths:
         required: true
       responses:
         200:
-          description: Message was send correctly
-        400:
-          description: Incorrect API_KEY or incorrect chat ID or other errors
+          description: "Message was send correctly"
+        401:
+          description: "Unauthorized: Invalid api key"
+        500:
+          description: "Internal Server Error"
       security:
       - SessionKey: []
-      
-      
-  /chats/{chatId}/{lastMessageId}:
-    get:
-      summary: get all messages after last message in chat with entered id
-      description: get messages after last message in concrete chat 
-      operationId: getMessagesInChatAfterLastMessage
-      parameters:
-        - in: path
-          name: chatId
-          required: true
-          schema:
-            type: integer
-            minimum: 1
-        - in: path
-          name: lastMessageId
-          required: true
-          schema:
-            type: integer
-            minimum: 1
-      responses:
-        200:
-          description: Messages are taken correctly
-          content: 
-            application/json:
-              schema:
-                $ref: '#/components/schemas/MessageArray2'
-        400:
-          description: Incorrect API_KEY or incorrect chat ID or other errors
-      security:
-      - SessionKey: [] 
+
     
 components:
   schemas:
@@ -201,7 +189,27 @@ components:
       - chatId: 3
         chatName: SomeChatName13
         creatorName: someUser133
-    
+
+    Chat:
+      type: object
+      properties:
+        chatId:
+          type: integer
+          example: 1
+        chatName:
+          type: string
+          example: SomeChatName
+        creatorName:
+          type: string
+          example: someUser
+
+    ChatPOST:
+      type: object
+      properties:
+        chatName:
+          type: string
+          example: SomeChatName
+
     MessageArray:
       type: array
       items:
@@ -236,28 +244,8 @@ components:
       - messageID: 4
         creatorName: SomeUserLogin2
         timeStamp: 30.01.21 17:36
-        messageBody: Because I've been doing this lab all day.   
-        
-    Chat:
-      type: object
-      properties:
-        chatId:
-          type: integer
-          example: 1
-        chatName:
-          type: string
-          example: SomeChatName
-        creatorName:
-          type: string
-          example: someUser
-          
-    ChatPOST:
-      type: object
-      properties:
-        chatName:
-          type: string
-          example: SomeChatName
-          
+        messageBody: Because I've been doing this lab all day.
+
     MessageModel:
       type: object
       properties:
@@ -273,13 +261,14 @@ components:
         messageBody:
           type: string
           example: Hello! How are you?)
-    
+
     MessagePOST:
       type: object
       properties:
         messageBody:
           type: string
           example: Hello! How are you?)
+
           
   securitySchemes:
     SessionKey:
