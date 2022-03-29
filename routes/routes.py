@@ -100,8 +100,6 @@ def chats():
         return "Unauthorized: Invalid api key", 401
 
 
-# todo Задумка следующая: в качестве параметров передается count - количество сообщений до или после
-#  сообщения с заданным ID (Соответственно, если count>0, то берутся сообщения после, если <0, то сообщения до
 @main_routes.route('/chats/<int:chat_id>', methods=['GET', 'POST'])
 def messages_in_concrete_chat(chat_id: int):
     curr_api_key = request.headers.get("x-auth-key")
