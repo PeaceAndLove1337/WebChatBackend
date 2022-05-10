@@ -2,7 +2,7 @@ import unittest
 
 from application.data.db_models import db
 from application.data.db_queries import take_user_by_login, take_last_user_session_by_user
-from application.main import app
+from main import app
 from application.routes.routes import main_routes
 
 
