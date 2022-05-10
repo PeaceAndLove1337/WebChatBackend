@@ -2,7 +2,8 @@ import flask
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash
 
-from application.data.db_queries import take_user_by_login, take_last_user_session_by_user, is_api_key_working, take_all_chats, \
+from application.data.db_queries import take_user_by_login, take_last_user_session_by_user, is_api_key_working, \
+    take_all_chats, \
     take_user_name_by_user_id, take_chat_by_id, take_message_by_message_id, take_last_messages_in_chat, \
     take_messages_in_chat_after_message_id, take_messages_in_chat_before_message_id
 from application.data.db_transactions import add_new_user_in_db, add_new_session_in_db, add_new_chat_in_db, \
@@ -15,7 +16,6 @@ main_routes = Blueprint("main_routes", __name__)
 @main_routes.route('/register', methods=['POST'])
 def register():
     if request.method == "POST":
-
         json = request.get_json()
         curr_login = json["login"]
         curr_password = json["password"]
@@ -176,5 +176,10 @@ def messages_in_concrete_chat(chat_id: int):
 @main_routes.route('/test', methods=['GET'])
 def test():
     one = request.args.get('arg1', default="SOME_ARGUMENT", type=str)
-    two = request.args.get('arg2', default=22, type=int)
+    two = request.args.get('arg2', default=0, type=int)
     return "Backend works correctly  " + one + "  " + str(two)
+
+
+@main_routes.route('/', methods=['GET'])
+def test2():
+    return "Hello"
