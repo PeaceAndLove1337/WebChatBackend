@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_cors import CORS
 
-from data.allfunc import db
+from data.db_models import db
 from routes.routes import main_routes
 
 app = Flask(__name__)

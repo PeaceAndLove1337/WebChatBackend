@@ -1,13 +1,13 @@
-import datetime
-
 import flask
 from flask import Blueprint, request, jsonify
 from werkzeug.security import check_password_hash
 
-from data.allfunc import take_user_by_login, take_last_user_session_by_user, \
-    add_new_session_in_db, add_new_user_in_db, is_api_key_working, take_all_chats, take_user_name_by_user_id, \
-    add_new_chat_in_db, take_chat_by_id, take_last_messages_in_chat, add_new_message_in_chat_in_db, \
-    take_message_by_message_id, take_messages_in_chat_after_message_id, take_messages_in_chat_before_message_id
+from data.db_queries import take_user_by_login, take_last_user_session_by_user, is_api_key_working, take_all_chats, \
+    take_user_name_by_user_id, take_chat_by_id, take_message_by_message_id, take_last_messages_in_chat, \
+    take_messages_in_chat_after_message_id, take_messages_in_chat_before_message_id
+from data.db_transactions import add_new_user_in_db, add_new_session_in_db, add_new_chat_in_db, \
+    add_new_message_in_chat_in_db
+from domain.business_logic import take_time_at_now
 
 main_routes = Blueprint("main_routes", __name__)
 
@@ -42,7 +42,7 @@ def login():
             return "Unauthorized: Incorrect password", 401
 
         else:
-            curr_time = datetime.datetime.now()
+            curr_time = take_time_at_now()
 
             curr_user_valid_session = take_last_user_session_by_user(curr_user_data)
 
