@@ -1,8 +1,8 @@
 from flask import Flask
 from flask_cors import CORS
 
-from data.db_models import db
-from routes.routes import main_routes
+from application.data.db_models import db
+from application.routes.routes import main_routes
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///data///webchat.db'

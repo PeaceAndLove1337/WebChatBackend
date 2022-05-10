@@ -2,9 +2,9 @@ from typing import Optional
 
 from werkzeug.security import generate_password_hash
 
-from data.db_models import User, db, Session, Chat, Message
-from data.db_queries import take_user_id_by_api_key
-from domain.business_logic import generate_api_key_by_time, take_time_at_now_without_ms, take_time_at_now, \
+from application.data.db_models import User, db, Session, Chat, Message
+from application.data.db_queries import take_user_id_by_api_key
+from application.domain.business_logic import generate_api_key_by_time, take_time_at_now_without_ms, take_time_at_now, \
     take_time_at_now_with_delta_one_day
 
 

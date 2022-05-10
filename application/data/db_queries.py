@@ -1,5 +1,5 @@
-from data.db_models import User, Session, Chat, Message
-from domain.business_logic import is_entered_date_less_than_curr_time
+from application.data.db_models import User, Session, Chat, Message
+from application.domain.business_logic import is_entered_date_less_than_curr_time
 
 
 def take_user_by_login(curr_login: str) -> User:
