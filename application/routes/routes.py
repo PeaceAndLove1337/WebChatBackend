@@ -60,9 +60,11 @@ def login():
 
                 if api_key is not None:
                     response.headers["x-auth-key"] = api_key
-                    response.data = "User was correctly login", 200
+                    response.status_code = 200
+                    response.data = "User was correctly login"
                 else:
-                    response.data = "Internal Server Error", 500
+                    response.status_code = 500
+                    response.data = "Internal Server Error"
 
             return response
 
@@ -178,8 +180,3 @@ def test():
     one = request.args.get('arg1', default="SOME_ARGUMENT", type=str)
     two = request.args.get('arg2', default=0, type=int)
     return "Backend works correctly  " + one + "  " + str(two)
-
-
-@main_routes.route('/', methods=['GET'])
-def test2():
-    return "Hello"
