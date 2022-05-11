@@ -11,9 +11,7 @@ class TestCase(unittest.TestCase):
     def setUp(self):
         app.config['TESTING'] = True
         app.config['CSRF_ENABLED'] = False
-        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///D:///Projects///StudentProjects///' \
-                                                'MobileNetworksSystems///WebChatApp///WebChatBackend///' \
-                                                'testing///data///test_webchat.db'
+        app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///testing///data///test_webchat.db'
         self.app = app.test_client()
         db.init_app(app)
         app.register_blueprint(main_routes)
